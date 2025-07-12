@@ -89,6 +89,7 @@ jobs:
             *_*_*.changes
             *_*_*.deb
             *_*_*.udeb
+            *.pkg.tar*
 
       - name: Dequeue
         if: always()
