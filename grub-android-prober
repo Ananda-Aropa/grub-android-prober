@@ -15,7 +15,7 @@
 : "${GRUB_ANDROID_EXCLUDE_SEARCH:="/bin,/boot/efi,/efi,/EFI,/dev,/etc,/lib,/lib64,/lib32,/proc,/run,/sbin,/srv,/sys,/usr,/var,/tmp,/Program Files,/Program Files (x86),/ProgramData,/Windows,/Users,/Volumes,/System,/Library,/cores,/@,/@home,/@root,/@srv,/@cache,/@tmp,/@log"}"
 
 # Search image names
-: "${GRUB_ANDROID_INCLUDE_SEARCH:="system_a.efs system_a.sfs system_a.img system_a system.efs system.sfs system.img system"}"
+: "${GRUB_ANDROID_INCLUDE_SEARCH:="fstab.android system_a.efs system_a.sfs system_a.img system_a system.efs system.sfs system.img system"}"
 
 # Search recursiveness depth
 : "${GRUB_ANDROID_SEARCH_DEPTH:=3}"
@@ -32,8 +32,10 @@ grep_string() { grep "$2" <<<"${1}"; }
 grep_prop() { grep_string "${1}" "ro.$2=" | awk -F"=" '{print $2}'; }
 get_version_prop() { grep_prop "${1}" "$2.version${3:+.$3}" | head -1; }
 
+type dmraid >/dev/null 2>&1 && HAS_DMRAID=1
+
 on_sataraid() {
-	type dmraid >/dev/null 2>&1 || return 1
+	[ "$HAS_DMRAID" ] || return 1
 	local parent="${1%/*}"
 	local device="/dev/${parent##*/}"
 	if dmraid -r -c | grep -q "$device"; then
@@ -42,18 +44,18 @@ on_sataraid() {
 	return 1
 }
 
+type udevadm >/dev/null 2>&1 && HAS_UDEVADM=1
+
 parse_proc_mdstat() {
-	if type udevadm >/dev/null 2>&1; then
-		udevinfo() {
-			udevadm info "$@"
-		}
+	if [ "$HAS_UDEVADM" ]; then
+		udevinfo() { udevadm info "$@"; }
 	fi
 	while read -r line; do
 		for word in $line; do
 			dev="${word%%\[*}"
 			# TODO: factor this out to something in di-utils if
 			# it's needed elsewhere
-			if [ -d /sys/block ] && type udevinfo >/dev/null 2>&1; then
+			if [ -d /sys/block ] && [ "$HAS_UDEVADM" ]; then
 				if ! udevinfo -q path -n "/dev/$dev" 2>/dev/null |
 					grep -q '/.*/.*/'; then
 					continue
@@ -92,8 +94,7 @@ partitions() {
 		done
 
 		# Add Serial ATA RAID devices
-		if type dmraid >/dev/null 2>&1 &&
-			dmraid -s -c >/dev/null 2>&1; then
+		if [ "$HAS_DMRAID" ] && dmraid -s -c >&2; then
 			for raidset in $(dmraid -sa -c); do
 				for part in /dev/mapper/"$raidset"*[0-9]; do
 					echo "$part"
@@ -110,7 +111,7 @@ partitions() {
 	fi
 
 	# Also detect OSes on LVM volumes (assumes LVM is active)
-	if type lvs >/dev/null 2>&1; then
+	if type lvs >&2; then
 		env LVM_SUPPRESS_FD_WARNINGS=1 lvs --noheadings --separator : -o vg_name,lv_name 2>&1 |
 			sed "s|-|--|g;s|^[[:space:]]*\(.*\):\(.*\)$|/dev/mapper/\1-\2|" |
 			grep -v "No volume groups found"
@@ -252,7 +253,9 @@ find_os() {
 
 	IFS=,
 	for dir in ${GRUB_ANDROID_EXCLUDE_SEARCH}; do
-		EXCLUDE="$EXCLUDE -not \( -path \"${mountpoint}${dir/ /\\ }/*\" -prune \)"
+		if [ -d "${mountpoint}${dir/ /\\ }" ]; then
+			EXCLUDE="$EXCLUDE -not \( -path \"${mountpoint}${dir/ /\\ }/*\" -prune \)"
+		fi
 	done
 	unset IFS
 
@@ -294,23 +297,23 @@ tmpmount() {
 	disktmp="$(mktemp)"
 	rm -f "$disktmp"
 	mkdir -p "$disktmp" || :
-	# if ! { type grub-mount && grub-mount "$1" "$disktmp"; } >/dev/null 2>&1; then
 	[ "$(blkid_section TYPE "$1")" = "ntfs" ] && fs=$NTFS
 
 	local roflag mounted
 	for roflag in "ro" "ro,force"; do
 		# try with no `force` flag first
-		if mount -o $roflag$opts -t "$fs" "$1" "$disktmp" >/dev/null 2>&1; then
+		if mount -o $roflag$opts -t "$fs" "$1" "$disktmp" >&2; then
 			mounted=1
 			break
 		fi
 	done
 	# fi
-	if [ "$mounted" ]; then
-		echo "$disktmp"
-	else
+	if [ ! "$mounted" ]; then
+		rm -rf "$disktmp"
 		return 1
 	fi
+
+	echo "$disktmp"
 }
 
 mount_find() {
@@ -327,6 +330,8 @@ mount_find() {
 	else
 		existing_mp="$(grep "$1" /proc/mounts | head -1 | awk '{print $2}')" || return 1
 	fi
+
+	[ "$existing_mp" ] || return 1
 
 	find_os "$existing_mp" "$1"
 
@@ -362,7 +367,9 @@ LM=
 grep -oqw 'lm' /proc/cpuinfo && LM=1
 
 # check if kernel supports ntfs3
-if modinfo ntfs3 >/dev/null 2>&1; then
+if modinfo ntfsplus >/dev/null 2>&1; then
+	NTFS=ntfs
+elif modinfo ntfs3 >/dev/null 2>&1; then
 	NTFS=ntfs3
 else
 	NTFS=ntfs-3g
