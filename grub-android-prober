@@ -70,11 +70,8 @@ parse_proc_mdstat() {
 }
 
 parse_proc_swaps() {
-	while read -r line; do
-		set -f
-		set -- $line
-		set +f
-		echo "$(mapdevfs $1) swap"
+	while read -r dev rest; do
+		echo "$(mapdevfs "$dev") swap"
 	done
 }
 
@@ -85,7 +82,7 @@ partitions() {
 		# Serial ATA RAID disk.
 		for part in /sys/block/*/*[0-9]; do
 			if [ -f "$part/start" ] &&
-				[ ! -f "$part/whole_disk" ] && ! on_sataraid $part; then
+			[ ! -f "$part/whole_disk" ] && ! on_sataraid "$part"; then
 				name="$(echo "${part##*/}" | sed 's,[!.],/,g')"
 				if [ -e "/dev/$name" ]; then
 					echo "/dev/$name"
@@ -94,7 +91,7 @@ partitions() {
 		done
 
 		# Add Serial ATA RAID devices
-		if [ "$HAS_DMRAID" ] && dmraid -s -c >&2; then
+		if [ "$HAS_DMRAID" ] && dmraid -s -c >/dev/null 2>&1; then
 			for raidset in $(dmraid -sa -c); do
 				for part in /dev/mapper/"$raidset"*[0-9]; do
 					echo "$part"
@@ -111,7 +108,7 @@ partitions() {
 	fi
 
 	# Also detect OSes on LVM volumes (assumes LVM is active)
-	if type lvs >&2; then
+	if type lvs >/dev/null 2>&1; then
 		env LVM_SUPPRESS_FD_WARNINGS=1 lvs --noheadings --separator : -o vg_name,lv_name 2>&1 |
 			sed "s|-|--|g;s|^[[:space:]]*\(.*\):\(.*\)$|/dev/mapper/\1-\2|" |
 			grep -v "No volume groups found"
@@ -302,7 +299,7 @@ tmpmount() {
 	local roflag mounted
 	for roflag in "ro" "ro,force"; do
 		# try with no `force` flag first
-		if mount -o $roflag$opts -t "$fs" "$1" "$disktmp" >&2; then
+		if mount -o $roflag$opts -t "$fs" "$1" "$disktmp" >/dev/null 2>&1; then
 			mounted=1
 			break
 		fi
@@ -378,11 +375,11 @@ fi
 mkdir -p /tmp/aprob
 : >"/tmp/aprob/swaps-map"
 if [ -f /proc/swaps ]; then
-	grep "^/dev/" /proc/swaps | parse_proc_swaps >"/tmp/aprob/swaps-map" || :
+	grep "^/dev/" /proc/swaps | parse_proc_swaps >"/tmp/aprob/swaps-map" || true
 fi
 : >"/tmp/aprob/raided-map"
 if [ -f /proc/mdstat ]; then
-	grep "^md" /proc/mdstat | parse_proc_mdstat >"/tmp/aprob/raided-map" || :
+	grep "^md" /proc/mdstat | parse_proc_mdstat >"/tmp/aprob/raided-map" || true
 fi
 
 for partition in $(partitions); do

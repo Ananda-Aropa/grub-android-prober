@@ -26,7 +26,7 @@ export TEXTDOMAINDIR="${datarootdir}/locale"
 CLASS="--class android --class os"
 OS="Android"
 
-sub_indent() { echo -e "$submenu_indentation$*"; }
+sub_indent() { printf '%s%s\n' "$submenu_indentation" "$*"; }
 
 android_entry() {
 	local \
@@ -53,11 +53,10 @@ android_entry() {
 	fi
 
 	sub_indent "	insmod gzio"
-	echo -e "$disk" | sed "s/^/$submenu_indentation	/gm"
+	printf '%s\n' "$disk" | sed "s/^/$submenu_indentation\t/gm"
 	sub_indent "	linux $kernel $cmdline"
 	sub_indent "	initrd ${ucode_list# } $initrd"
-
-	sub_indent "}\n"
+	sub_indent "}"
 }
 
 gen_entry() {
@@ -152,7 +151,8 @@ gen_entry() {
 			if [ "$type" = "default" ] && [ "$bootfile" ]; then
 				case "$bootfile" in
 				*.env.cfg)
-					disk="$disk\nsource $src/boot/$bootfile"
+				disk="$disk
+	source $src/boot/$bootfile"
 					cmdline="$cmdline \$cmdline androidboot.bootctrl_bootcfg=/boot/$bootfile"
 					;;
 				*) ;;
@@ -166,7 +166,7 @@ gen_entry() {
 
 		if [ "$kernel_type" = fstab ] && [ "$system" = traditional ]; then
 			parse_to_entry "kernel" "initrd.img"
-		elif [ "$kernel_type" = fstab ] && [[ "$system" = _* ]]; then
+		elif [ "$kernel_type" = fstab ] && case "$system" in _*) true ;; *) false ;; esac; then
 			parse_to_entry "kernel${system}" "initrd${system}.img"
 			# Handle recovery mode
 			title="$os - Recovery Mode"
@@ -219,6 +219,6 @@ $(echo -e "$EXTENDED_ENTRIES")
 EOF
 }
 
-while read -r detect_entry; do
+grub-android-prober | while read -r detect_entry; do
 	gen_entry "$detect_entry"
-done < <(grub-android-prober)
+done
