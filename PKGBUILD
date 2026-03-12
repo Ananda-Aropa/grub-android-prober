@@ -11,7 +11,7 @@ depends=('grub' 'bash')
 provides=('grub-android-prober')
 conflicts=('grub-android-prober')
 source=('30_android-prober' 'grub-android-prober')
-sha512sums=(	'2a0635a27bb0b88d93d891f957c53638fbbe027dcc9151ac16ba017aa09b277f8fca2315144aa0ef5b4b35f6a0c904e1a8f393521d82e8765df85d9a66a49bff'	'c8db060eaa912cb2f30f13e0051c5c25d08e3684051b75ac1554eef0d6055552fb3a76dd8e87ebdac51cf66a113fb1b92047d4855fd41cf97199ac80ad42e169' )
+sha512sums=(	'2a0635a27bb0b88d93d891f957c53638fbbe027dcc9151ac16ba017aa09b277f8fca2315144aa0ef5b4b35f6a0c904e1a8f393521d82e8765df85d9a66a49bff'	'63c78b2c0177f38821c1cb8da07fb7a2eda35668a19bf51bbd9ec40d5bc511f4c12c1a2a28592e33d8c5e775f30c3b839fcf90139b5735fdc232ae0315820d22' )
 
 package() {
 	cd "$srcdir"

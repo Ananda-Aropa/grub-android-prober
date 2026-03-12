@@ -12,7 +12,11 @@
 
 # Excluded paths
 # Start with a slash, separated by ',', ending slashes are not needed
-: "${GRUB_ANDROID_EXCLUDE_SEARCH:="/bin,/boot/efi,/efi,/EFI,/dev,/etc,/lib,/lib64,/lib32,/proc,/run,/sbin,/srv,/sys,/usr,/var,/tmp,/Program Files,/Program Files (x86),/ProgramData,/Windows,/Users,/Volumes,/System,/Library,/cores,/@,/@home,/@root,/@srv,/@cache,/@tmp,/@log"}"
+: "${GRUB_ANDROID_EXCLUDE_SEARCH:="/bin,/boot/efi,/dev,/etc,/lib,/lib64,/lib32,/proc,/run,/sbin,/srv,/sys,/usr,/var,/tmp,/Program Files,/Program Files (x86),/ProgramData,/Windows,/Users,/Volumes,/System,/Library,/cores,/@,/@home,/@root,/@srv,/@cache,/@tmp,/@log"}"
+
+# Skipped paths
+# Start with a slash, separated by ',', ending slashes are not needed
+: "${GRUB_ANDROID_SKIP_SEARCH:="/efi,/EFI,/syslinux,/extlinux"}"
 
 # Search image names
 : "${GRUB_ANDROID_INCLUDE_SEARCH:="fstab.android system_a.efs system_a.sfs system_a.img system_a system.efs system.sfs system.img system"}"
@@ -249,8 +253,13 @@ find_os() {
 	local mountpoint=$1 device=$2 foundpaths EXCLUDE=""
 
 	IFS=,
+	for _d in ${GRUB_ANDROID_SKIP_SEARCH}; do
+		if [ -d "${mountpoint}${_d}" ]; then
+			return 1
+		fi
+	done
 	for dir in ${GRUB_ANDROID_EXCLUDE_SEARCH}; do
-		if [ -d "${mountpoint}${dir/ /\\ }" ]; then
+		if [ -d "${mountpoint}${dir}" ]; then
 			EXCLUDE="$EXCLUDE -not \( -path \"${mountpoint}${dir/ /\\ }/*\" -prune \)"
 		fi
 	done
@@ -304,7 +313,7 @@ tmpmount() {
 			break
 		fi
 	done
-	# fi
+
 	if [ ! "$mounted" ]; then
 		rm -rf "$disktmp"
 		return 1
