@@ -26,37 +26,36 @@ export TEXTDOMAINDIR="${datarootdir}/locale"
 CLASS="--class android --class os"
 OS="Android"
 
-sub_indent() { printf '%s%s\n' "$submenu_indentation" "$*"; }
-
 android_entry() {
 	local \
 		menuentry_id=$1 \
 		kernel=$2 \
 		initrd=$3
 
-	sub_indent "menuentry '$(echo "$title" | grub_quote)' ${CLASS} \$menuentry_id_option '$menuentry_id' {"
+	echo "menuentry '$(echo "$title" | grub_quote)' ${CLASS} \$menuentry_id_option '$menuentry_id' {"
+	{
+		save_default_entry
 
-	save_default_entry | grub_add_tab
+		# Use ELILO's generic "efifb" when it's known to be available.
+		# FIXME: We need an interface to select vesafb in case efifb can't be used.
+		if [ ! "$GRUB_GFXPAYLOAD_LINUX" ]; then
+			echo "load_video"
+			grep -qx "CONFIG_FB_EFI=y" "${config}" 2>/dev/null &&
+				grep -qx "CONFIG_VT_HW_CONSOLE_BINDING=y" "${config}" 2>/dev/null &&
+				echo "set gfxpayload=keep"
 
-	# Use ELILO's generic "efifb" when it's known to be available.
-	# FIXME: We need an interface to select vesafb in case efifb can't be used.
-	if [ ! "$GRUB_GFXPAYLOAD_LINUX" ]; then
-		sub_indent "	load_video"
-		grep -qx "CONFIG_FB_EFI=y" "${config}" 2>/dev/null &&
-			grep -qx "CONFIG_VT_HW_CONSOLE_BINDING=y" "${config}" 2>/dev/null &&
-			sub_indent "	set gfxpayload=keep"
+		else
+			[ "$GRUB_GFXPAYLOAD_LINUX" = text ] ||
+				echo "load_video"
+			echo "set gfxpayload=$GRUB_GFXPAYLOAD_LINUX"
+		fi
 
-	else
-		[ "$GRUB_GFXPAYLOAD_LINUX" = text ] ||
-			sub_indent "	load_video"
-		sub_indent "	set gfxpayload=$GRUB_GFXPAYLOAD_LINUX"
-	fi
-
-	sub_indent "	insmod gzio"
-	printf '%s\n' "$disk" | sed "s/^/$submenu_indentation\t/gm"
-	sub_indent "	linux $kernel $cmdline"
-	sub_indent "	initrd ${ucode_list# } $initrd"
-	sub_indent "}"
+		echo "insmod gzio"
+		echo -e "$disk"
+		echo "linux $kernel $cmdline"
+		echo "initrd ${ucode_list# } $initrd"
+	} | grub_add_tab
+	echo "}"
 }
 
 gen_entry() {
@@ -103,10 +102,6 @@ gen_entry() {
 		MAIN_ENTRY \
 		EXTENDED_ENTRIES
 
-	# Extra indentation to add to menu entries in a submenu. We're not in a submenu
-	# yet, so it's empty. In a submenu it will be equal to '\t' (one tab).
-	submenu_indentation=""
-
 	title=$os
 
 	entry() {
@@ -120,7 +115,6 @@ gen_entry() {
 		if [ "$type" = "default" ]; then
 			MAIN_ENTRY=$(entry "$@")
 			type=extended
-			submenu_indentation=$grub_tab
 		fi
 
 		EXTENDED_ENTRIES="$EXTENDED_ENTRIES\n$(entry "$@")"
@@ -151,8 +145,7 @@ gen_entry() {
 			if [ "$type" = "default" ] && [ "$bootfile" ]; then
 				case "$bootfile" in
 				*.env.cfg)
-				disk="$disk
-	source $src/boot/$bootfile"
+					disk="$disk\nsource $src/boot/$bootfile"
 					cmdline="$cmdline \$cmdline androidboot.bootctrl_bootcfg=/boot/$bootfile"
 					;;
 				*) ;;
@@ -166,7 +159,7 @@ gen_entry() {
 
 		if [ "$kernel_type" = fstab ] && [ "$system" = traditional ]; then
 			parse_to_entry "kernel" "initrd.img"
-		elif [ "$kernel_type" = fstab ] && case "$system" in _*) true ;; *) false ;; esac; then
+		elif [ "$kernel_type" = fstab ] && case "$system" in _*) true ;; *) false ;; esac then
 			parse_to_entry "kernel${system}" "initrd${system}.img"
 			# Handle recovery mode
 			title="$os - Recovery Mode"
@@ -213,7 +206,7 @@ gen_entry() {
 $(echo -e "$MAIN_ENTRY")
 
 submenu '$(echo "Advanced options for $os" | grub_quote)' --class submenu ${CLASS} \$menuentry_id_option '${OS}-${src##*/}-${type}-${boot_device_id}' { 
-$(echo -e "$EXTENDED_ENTRIES")
+$(echo -e "$EXTENDED_ENTRIES" | grub_add_tab)
 }
 
 EOF
