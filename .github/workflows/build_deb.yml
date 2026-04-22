@@ -49,7 +49,7 @@ jobs:
           rm -rf queue
 
       - name: Check out
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up source files
         run: ./debian/setup.sh
@@ -81,7 +81,7 @@ jobs:
           sudo rm -rf install install.tar
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           path: |
             metadata.yml
@@ -120,7 +120,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup variables
         run: |
@@ -129,7 +129,7 @@ jobs:
 
       - name: Download artifacts
         id: download-artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: out
           pattern: "*"
@@ -138,7 +138,7 @@ jobs:
       - name: List Files
         run: ls -R ${{ steps.download-artifacts.outputs.download-path }}
 
-      - uses: "softprops/action-gh-release@v2.1.0"
+      - uses: softprops/action-gh-release@v2
         with:
           token: "${{ secrets.RELEASE_TOKEN }}"
           prerelease: false
