@@ -1,0 +1,8 @@
+post_install() {
+	echo "Running grub-android-prober..."
+	/usr/sbin/grub-android-prober
+}
+
+post_upgrade() {
+	post_install
+}

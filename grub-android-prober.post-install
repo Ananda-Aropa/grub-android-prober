@@ -1,0 +1,6 @@
+#!/bin/sh
+
+echo "Running grub-android-prober..."
+/usr/sbin/grub-android-prober
+
+exit 0

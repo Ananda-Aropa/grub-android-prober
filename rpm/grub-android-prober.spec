@@ -34,17 +34,21 @@ Android Prober cache.
 
 %install
 mkdir -p %{buildroot}%{_sysconfdir}/grub.d
-mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_sbindir}
 mkdir -p %{buildroot}%{_unitdir}
 
 install -m 755 %{SOURCE0} %{buildroot}%{_sysconfdir}/grub.d/30_android-prober
-install -m 755 %{SOURCE1} %{buildroot}%{_bindir}/grub-android-prober
+install -m 755 %{SOURCE1} %{buildroot}%{_sbindir}/grub-android-prober
 install -m 644 %{SOURCE3} %{buildroot}%{_unitdir}/android-prober.service
 install -m 644 %{SOURCE4} %{buildroot}%{_unitdir}/android-prober@.timer
 
+%post
+echo "Running grub-android-prober..."
+%{_sbindir}/grub-android-prober
+
 %files
 %{_sysconfdir}/grub.d/30_android-prober
-%{_bindir}/grub-android-prober
+%{_sbindir}/grub-android-prober
 
 %files systemd
 %{_unitdir}/android-prober.service

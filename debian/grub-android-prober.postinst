@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "configure" ]; then
+	echo "Running grub-android-prober..."
+	/usr/sbin/grub-android-prober
+fi
+
+#DEBHELPER#
+
+exit 0

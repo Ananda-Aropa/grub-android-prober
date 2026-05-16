@@ -212,6 +212,6 @@ $(echo -e "$EXTENDED_ENTRIES" | grub_add_tab)
 EOF
 }
 
-grub-android-prober | while read -r detect_entry; do
+/usr/sbin/grub-android-prober | while read -r detect_entry; do
 	gen_entry "$detect_entry"
 done
