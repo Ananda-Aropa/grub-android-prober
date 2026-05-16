@@ -8,12 +8,12 @@ arch="noarch"
 license="GPL-3.0-or-later"
 depends="grub bash"
 subpackages="$pkgname-systemd:systemd_subpkg"
+install="$pkgname.post-install"
 source="30_android-prober
 	grub-android-prober
 	VERSION
 	android-prober.service
 	android-prober@.timer"
-install="$pkgname.post-install"
 
 package() {
 	install -Dm755 "$srcdir"/30_android-prober "$pkgdir"/etc/grub.d/30_android-prober
@@ -27,3 +27,4 @@ systemd_subpkg() {
 	install -Dm644 "$srcdir"/android-prober@.timer "$subpkgdir"/usr/lib/systemd/system/android-prober@.timer
 }
 
+sha512sums=""

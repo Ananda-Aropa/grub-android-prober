@@ -41,15 +41,6 @@ if [ -f PKGBUILD ]; then
 	makepkg --printsrcinfo >.SRCINFO
 fi
 
-# Update APKBUILD hashes
-if [ -f APKBUILD ]; then
-	if grep -q "^sha512sums=" APKBUILD; then
-		# Replace existing sha512sums
-		sed -i "/^sha512sums=\"/,/\"/d" APKBUILD
-	fi
-	echo -e "sha512sums=\"\n${HASHES_ALPINE}\"" >> APKBUILD
-fi
-
 
 # Setup source files
 mv systemd/* ./
