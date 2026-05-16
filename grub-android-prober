@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 [ "$EUID" = 0 ] || { echo "ERROR: Please run as root" && exit 1; }
 
 . "/usr/share/grub/grub-mkconfig_lib"
@@ -26,6 +28,43 @@
 
 # Default parameters
 : "${GRUB_CMDLINE_ANDROID:=""}"
+
+# Caching
+: "${GRUB_ANDROID_CACHE:="enabled"}"
+: "${GRUB_ANDROID_CACHE_DIR:="/var/cache/grub/android"}"
+: "${GRUB_ANDROID_CACHE_EXPIRE_DAYS:="60"}"
+
+has_cache() {
+	local c=$GRUB_ANDROID_CACHE
+	[ "$c" ] && [ "$c" != "disabled" ] && [ "$c" != "false" ] && [ "$c" != "0" ]
+}
+
+cache_check() {
+	has_cache || return
+	if [ ! -d "$GRUB_ANDROID_CACHE_DIR" ]; then
+		mkdir -p "$GRUB_ANDROID_CACHE_DIR"
+		return
+	fi
+
+	local cache_file
+	cache_file=$(find "$GRUB_ANDROID_CACHE_DIR" -mindepth 1 -maxdepth 1 -type f -print -quit)
+	[ -f "$cache_file" ] || return
+
+	local cache_name cache_exp_date
+	cache_name=$(basename "$cache_file")
+	cache_exp_date=${cache_name##*-}
+
+	if [ "$cache_exp_date" -lt "$(date +%s)" ]; then
+		rm -rf "$GRUB_ANDROID_CACHE_DIR"
+		mkdir -p "$GRUB_ANDROID_CACHE_DIR"
+		return
+	fi
+
+	cat "$cache_file"
+	exit 0
+}
+
+cache_check
 
 . /etc/default/grub
 . /etc/grub-android.conf 2>/dev/null || :
@@ -86,7 +125,7 @@ partitions() {
 		# Serial ATA RAID disk.
 		for part in /sys/block/*/*[0-9]; do
 			if [ -f "$part/start" ] &&
-			[ ! -f "$part/whole_disk" ] && ! on_sataraid "$part"; then
+				[ ! -f "$part/whole_disk" ] && ! on_sataraid "$part"; then
 				name="$(echo "${part##*/}" | sed 's,[!.],/,g')"
 				if [ -e "/dev/$name" ]; then
 					echo "/dev/$name"
@@ -347,6 +386,18 @@ mount_find() {
 	fi
 }
 
+cache_save() {
+	if ! has_cache; then
+		cat
+		exit 0
+	fi
+
+	mkdir -p "$GRUB_ANDROID_CACHE_DIR"
+	local date
+	date=$(date +%s)
+	tee "$GRUB_ANDROID_CACHE_DIR/cache-$((date + GRUB_ANDROID_CACHE_EXPIRE_DAYS * 86400))"
+}
+
 DEPTH=$GRUB_ANDROID_SEARCH_DEPTH
 
 delim=
@@ -408,4 +459,5 @@ for partition in $(partitions); do
 
 	mount_find "$partition"
 done |
-	sed 's/\xFF/\xFF\xFF/g; s/\x00/\xFF0/g'
+	sed 's/\xFF/\xFF\xFF/g; s/\x00/\xFF0/g' |
+	cache_save

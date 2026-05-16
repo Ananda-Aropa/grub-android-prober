@@ -19,3 +19,13 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends},
 Description: GRUB Configuration for Android detection (Only works with NTFS, extFS and vFat/exFat)
+
+Package: grub-android-prober-systemd
+Architecture: all
+Depends:
+ grub-android-prober (= ${binary:Version}),
+ systemd,
+ ${misc:Depends},
+Description: Systemd timer for grub-android-prober cache refresh
+ This package provides a systemd timer to periodically refresh the
+ Android Prober cache.

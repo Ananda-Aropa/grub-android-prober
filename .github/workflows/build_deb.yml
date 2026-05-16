@@ -1,4 +1,4 @@
-name: Generate .deb (ceres)
+name: Multi-distro Package Build
 
 on:
   push:
@@ -40,11 +40,11 @@ jobs:
           cd queue
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
-          touch ${REPO##*/}
-          git add ${REPO##*/}
-          git commit -m "Enqueue ${REPO}"
           git remote set-url --push origin https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/$QUEUE
-          git push origin $BRANCH
+          touch ${REPO##*/} &&
+          git add ${REPO##*/} &&
+          git commit -m "Enqueue ${REPO}" &&
+          git push origin $BRANCH || true
           cd ..
           rm -rf queue
 
@@ -66,19 +66,27 @@ jobs:
 
       - name: Build Arch package
         run: |
-          # Build docker image
-          docker buildx create --use --name archlinux-devel --buildkitd-flags '--allow-insecure-entitlement security.insecure'
-          docker buildx build --builder archlinux-devel -f archlinux.dockerfile -t archlinux --allow security.insecure --output type=tar,dest=install.tar .
+          docker buildx build -f docker/archlinux.dockerfile -t arch-build --allow security.insecure --output type=tar,dest=arch-install.tar .
+          mkdir arch-install
+          sudo tar -C arch-install -psxf arch-install.tar
+          find arch-install -name "*.pkg.tar*" -exec mv {} ./ \;
+          sudo rm -rf arch-install arch-install.tar
 
-          # Export it to install
-          mkdir install
-          sudo tar -C install -psxf install.tar
+      - name: Build Alpine package
+        run: |
+          docker buildx build -f docker/alpine.dockerfile -t alpine-build --allow security.insecure --output type=tar,dest=alpine-install.tar .
+          mkdir alpine-install
+          sudo tar -C alpine-install -psxf alpine-install.tar
+          find alpine-install -name "*.apk" -exec mv {} ./ \;
+          sudo rm -rf alpine-install alpine-install.tar
 
-          # Move content out
-          mv install/*.pkg.tar* ./
-
-          # Clean up
-          sudo rm -rf install install.tar
+      - name: Build RPM package
+        run: |
+          docker buildx build -f docker/rpm.dockerfile -t rpm-build --allow security.insecure --output type=tar,dest=rpm-install.tar .
+          mkdir rpm-install
+          sudo tar -C rpm-install -psxf rpm-install.tar
+          find rpm-install -name "*.rpm" -exec mv {} ./ \;
+          sudo rm -rf rpm-install rpm-install.tar
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
@@ -90,6 +98,8 @@ jobs:
             *_*_*.deb
             *_*_*.udeb
             *.pkg.tar*
+            *.apk
+            *.rpm
 
       - name: Dequeue
         if: always()
@@ -105,11 +115,11 @@ jobs:
           cd queue
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
+          git remote set-url --push origin https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/$QUEUE
           rm -rf ${REPO##*/}
           git add .
           git commit -m "Dequeue ${REPO}"
-          git remote set-url --push origin https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/$QUEUE
-          git push origin $BRANCH
+          while ! git push origin $BRANCH; do sleep 5; git fetch --no-tags origin $BRANCH; git rebase origin/$BRANCH; done
           cd ..
           rm -rf queue
 

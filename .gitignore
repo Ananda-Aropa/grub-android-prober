@@ -3,3 +3,4 @@
 /src
 /pkg
 /debian/grub-android-prober
+*.log>

@@ -1,8 +1,15 @@
-# grub-android-x86
+# grub-android-prober
 
-This is GRUB Configuration for Android on PC detection for Linux
+`grub-android-prober` is a tool designed to automatically detect Android-x86 and ARM64 Android based distributions (like Bliss OS, Phoenix OS, PrimeOS, LineageOS, and AOSP) on your system and generate the appropriate GRUB configuration entries. It supports various file systems and installation methods, including EDK II ARM64 systems using [AAROPA](https://github.com/orgs/Ananda-Aropa) (Ananda-Aropa) first-stage init or vendor-as-root feature, providing a seamless way to boot Android alongside your Linux distribution.
 
-Works with Android x86, not tested with ARM ROM like PrimeOS, LineageOS,...
+## Features
+
+- **Automated Detection:** Scans partitions for Android installations.
+- **Support for Multiple Distros:** Works with Bliss OS, Phoenix OS, PrimeOS, LineageOS, and standard Android-x86/ARM64.
+- **AAROPA-exclusive features:** Designed to support EDK II ARM64 Android & Linux dual boot systems using [AAROPA](https://github.com/orgs/Ananda-Aropa) first-stage init ([bootable/aaropa](https://github.com/Ananda-Aropa/bootable_aaropa)) or vendor-as-root feature.
+- **Cache Support:** Speeds up boot configuration generation by caching results.
+- **Customizable:** Configurable search paths, excluded directories, and kernel parameters.
+- **Systemd Integration:** Optional timer for periodic cache updates.
 
 ## Install
 

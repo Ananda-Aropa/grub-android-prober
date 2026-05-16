@@ -1,0 +1,6 @@
+[Unit]
+Description=Android Prober Cache Refresh
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/grub-android-prober

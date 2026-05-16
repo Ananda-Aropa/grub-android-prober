@@ -1,0 +1,10 @@
+[Unit]
+Description=Android Prober Cache Refresh Timer (Every %i Days)
+
+[Timer]
+OnUnitActiveSec=%i days
+OnBootSec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
