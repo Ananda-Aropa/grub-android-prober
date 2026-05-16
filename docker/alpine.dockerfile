@@ -8,7 +8,12 @@ RUN echo "builder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 COPY . /grub-android-prober
 RUN chown -R builder:builder /grub-android-prober
 RUN apk update
-RUN abuild-keygen -ani
+
+USER builder
+RUN abuild-keygen -an
+
+USER root
+RUN cp /home/builder/.abuild/*.pub /etc/apk/keys/
 
 USER builder
 WORKDIR /grub-android-prober
