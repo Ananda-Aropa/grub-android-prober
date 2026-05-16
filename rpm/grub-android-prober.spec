@@ -51,5 +51,3 @@ install -m 644 %{SOURCE4} %{buildroot}%{_unitdir}/android-prober@.timer
 %{_unitdir}/android-prober@.timer
 
 %changelog
-* T4 Thg 4 22 2026 shadichy <shadichy@blisslabs.org> - 0.1.6-1
-- fix: using shell scoped blocks for indentation

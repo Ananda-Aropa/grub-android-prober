@@ -12,7 +12,11 @@ if [ -f PKGBUILD ]; then
 	sed -i "s/^pkgver=.*/pkgver=$VERSION/" PKGBUILD
 fi
 
-. PKGBUILD
+# Load source array from PKGBUILD
+if [ -f PKGBUILD ]; then
+	# shellcheck source=PKGBUILD
+	. ./PKGBUILD
+fi
 
 # Update RPM spec
 if [ -f rpm/setup.sh ]; then
@@ -21,16 +25,31 @@ fi
 
 sha512_hash() { sha512sum "$1" | awk '{print $1}'; }
 
-HASHES=""
+HASHES_ARCH=""
+HASHES_ALPINE=""
 
 for f in "${source[@]}"; do
 	real_f="${f##*::}"
-	HASHES+="'$(sha512_hash "$real_f")' "
+	hash=$(sha512_hash "$real_f")
+	HASHES_ARCH+="'$hash' "
+	HASHES_ALPINE+="$hash  ${f%%::*}\n"
 done
 
+# Update PKGBUILD hashes
 if [ -f PKGBUILD ]; then
-	sed -ri "s/^sha512sums=\(.+\)$/sha512sums=($HASHES)/g" PKGBUILD
+	sed -ri "s/^sha512sums=\(.+\)$/sha512sums=($HASHES_ARCH)/g" PKGBUILD
 	makepkg --printsrcinfo >.SRCINFO
 fi
 
+# Update APKBUILD hashes
+if [ -f APKBUILD ]; then
+	if grep -q "^sha512sums=" APKBUILD; then
+		# Replace existing sha512sums
+		sed -i "/^sha512sums=\"/,/\"/d" APKBUILD
+	fi
+	echo -e "sha512sums=\"\n${HASHES_ALPINE}\"" >> APKBUILD
+fi
+
+
+# Setup source files
 mv systemd/* ./
