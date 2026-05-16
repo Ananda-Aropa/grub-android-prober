@@ -21,4 +21,4 @@ WORKDIR /grub-android-prober
 RUN bash /grub-android-prober/gen_pkgbuild.sh
 RUN abuild checksum
 RUN abuild -F -r
-RUN sudo mkdir -p /output && sudo cp /home/builder/packages/grub-android-prober/noarch/*.apk /output/
+RUN sudo mkdir -p /output && sudo find /home/builder /grub-android-prober -iname '*.apk' -exec cp -t /output {} +
