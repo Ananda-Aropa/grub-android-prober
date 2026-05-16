@@ -32,3 +32,5 @@ if [ -f PKGBUILD ]; then
 	sed -ri "s/^sha512sums=\(.+\)$/sha512sums=($HASHES)/g" PKGBUILD
 	makepkg --printsrcinfo >.SRCINFO
 fi
+
+mv systemd/* ./

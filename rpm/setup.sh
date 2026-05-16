@@ -21,3 +21,5 @@ cat <<EOT >> "$SPEC_FILE"
 * $DATE $MAINTAINER - $VERSION-$RELEASE
 - $MSG
 EOT
+
+cp -r systemd/. ./

@@ -11,8 +11,8 @@ subpackages="$pkgname-systemd:systemd_subpkg"
 source="30_android-prober
 	grub-android-prober
 	VERSION
-	android-prober.service::systemd/android-prober.service
-	android-prober@.timer::systemd/android-prober@.timer"
+	systemd/android-prober.service
+	systemd/android-prober@.timer"
 
 package() {
 	install -Dm755 "$srcdir"/30_android-prober "$pkgdir"/etc/grub.d/30_android-prober
@@ -22,6 +22,6 @@ package() {
 systemd_subpkg() {
 	pkgdesc="Systemd timer for grub-android-prober cache refresh"
 	depends="$pkgname systemd"
-	install -Dm644 "$srcdir"/android-prober.service "$subpkgdir"/usr/lib/systemd/system/android-prober.service
-	install -Dm644 "$srcdir"/android-prober@.timer "$subpkgdir"/usr/lib/systemd/system/android-prober@.timer
+	install -Dm644 "$srcdir"/systemd/android-prober.service "$subpkgdir"/usr/lib/systemd/system/android-prober.service
+	install -Dm644 "$srcdir"/systemd/android-prober@.timer "$subpkgdir"/usr/lib/systemd/system/android-prober@.timer
 }
