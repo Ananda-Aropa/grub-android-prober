@@ -1,7 +1,7 @@
 FROM archlinux:latest
 
 # Update packages
-RUN yes | pacman -Syyu base-devel grub bash fakeroot
+RUN yes | pacman -Syyu base-devel grub bash fakeroot git
 
 COPY . /grub-android-prober
 WORKDIR /grub-android-prober
