@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:edge
 
 RUN apk add --no-cache abuild build-base bash sudo
 
@@ -7,6 +7,7 @@ RUN echo "builder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 COPY . /grub-android-prober
 RUN chown -R builder:builder /grub-android-prober
+RUN apk update
 
 USER builder
 WORKDIR /grub-android-prober

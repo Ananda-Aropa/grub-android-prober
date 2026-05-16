@@ -7,6 +7,7 @@ url="https://github.com/shadichy/grub-android-x86"
 arch="noarch"
 license="GPL-3.0-or-later"
 depends="grub bash"
+makedepends=""
 subpackages="$pkgname-systemd:systemd_subpkg"
 install="$pkgname.post-install"
 source="30_android-prober

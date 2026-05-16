@@ -6,7 +6,6 @@ pkgbase = grub-android-prober
 	install = grub-android-prober.install
 	arch = any
 	license = GPLv3
-	makedepends = git
 	depends = grub
 	depends = bash
 	source = 30_android-prober

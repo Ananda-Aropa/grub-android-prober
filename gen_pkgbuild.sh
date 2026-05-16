@@ -41,6 +41,5 @@ if [ -f PKGBUILD ]; then
 	makepkg --printsrcinfo >.SRCINFO
 fi
 
-
 # Setup source files
 mv systemd/* ./
