@@ -16,4 +16,4 @@ RUN runuser -u nobody bash /grub-android-prober/gen_pkgbuild.sh
 
 RUN runuser -u nobody makepkg
 
-RUN mv /grub-android-prober/*.pkg.tar* /
+RUN mkdir -p /output && mv /grub-android-prober/*.pkg.tar* /output/

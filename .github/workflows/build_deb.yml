@@ -68,24 +68,24 @@ jobs:
         run: |
           docker buildx build -f docker/archlinux.dockerfile -t arch-build --allow security.insecure --output type=tar,dest=arch-install.tar .
           mkdir arch-install
-          sudo tar -C arch-install -psxf arch-install.tar
-          find arch-install -name "*.pkg.tar*" -exec mv {} ./ \;
+          sudo tar -C arch-install -psxf arch-install.tar output
+          find arch-install/output -mindepth 1 -maxdepth 1 -name "*.pkg.tar*" -exec mv {} ./ \;
           sudo rm -rf arch-install arch-install.tar
 
       - name: Build Alpine package
         run: |
           docker buildx build -f docker/alpine.dockerfile -t alpine-build --allow security.insecure --output type=tar,dest=alpine-install.tar .
           mkdir alpine-install
-          sudo tar -C alpine-install -psxf alpine-install.tar
-          find alpine-install -name "*.apk" -exec mv {} ./ \;
+          sudo tar -C alpine-install -psxf alpine-install.tar output
+          find alpine-install/output -mindepth 1 -maxdepth 1 -name "*.apk" -exec mv {} ./ \;
           sudo rm -rf alpine-install alpine-install.tar
 
       - name: Build RPM package
         run: |
           docker buildx build -f docker/rpm.dockerfile -t rpm-build --allow security.insecure --output type=tar,dest=rpm-install.tar .
           mkdir rpm-install
-          sudo tar -C rpm-install -psxf rpm-install.tar
-          find rpm-install -name "*.rpm" -exec mv {} ./ \;
+          sudo tar -C rpm-install -psxf rpm-install.tar output
+          find rpm-install/output -mindepth 1 -maxdepth 1 -name "*.rpm" -exec mv {} ./ \;
           sudo rm -rf rpm-install rpm-install.tar
 
       - name: Upload artifacts
