@@ -18,4 +18,4 @@ WORKDIR /grub-android-prober/distro/arch
 RUN runuser -u nobody makepkg
 
 RUN mkdir -p /output 
-RUN mv /grub-android-prober/*.pkg.tar* /output/
+RUN mv /grub-android-prober/distro/arch/*.pkg.tar* /output/
