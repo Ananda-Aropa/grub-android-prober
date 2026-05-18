@@ -3,12 +3,13 @@
 # Exit Immediately if a command fails
 set -e
 
+# Navigate to script directory
 cd "$(dirname "$0")"
 
 DISTRO="${DISTRO:-unstable}"
 MAINTAINER=$(git log -1 --pretty=format:'%an <%ae>')
-VERSION=$(cat ../VERSION | cut -d'v' -f2)
-REVISION=${REVISION:-0}
+VERSION=$(cat ../../VERSION | cut -d'v' -f2 | sed 's/-/+/g')
+REVISION=${REVISION:-1}
 
 PACKAGE_NAME=$(grep 'Source:' control | cut -d' ' -f2)
 
@@ -25,7 +26,3 @@ $(echo -e "$MSG" | sed -r 's/^/  * /g')
  -- $MAINTAINER  $DATE
 
 EOF
-
-# Update PKGBUILD
-sed -i "s/^pkgver=.*/pkgver=$VERSION/" ../PKGBUILD
-sed -i "s/^pkgrel=.*/pkgrel=$REVISION/" ../PKGBUILD

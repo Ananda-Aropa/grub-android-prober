@@ -1,2 +1,0 @@
-systemd/android-prober.service usr/lib/systemd/system
-systemd/android-prober@.timer usr/lib/systemd/system

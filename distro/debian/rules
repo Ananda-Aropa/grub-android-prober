@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+
+# See debhelper(7) (uncomment to enable).
+# Output every command that modifies files on the build system.
+#export DH_VERBOSE = 1
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+override_dh_auto_build:
+override_dh_auto_test:
+override_dh_dwz:
+
+override_dh_install:
+	dh_install
+	mkdir -p debian/grub-android-prober/etc/kernel/preinst.d
+	mkdir -p debian/grub-android-prober/etc/kernel/prerm.d
+	cp distro/debian/grub-android-prober.kernel-hook debian/grub-android-prober/etc/kernel/preinst.d/grub-android-prober
+	cp distro/debian/grub-android-prober.kernel-hook debian/grub-android-prober/etc/kernel/prerm.d/grub-android-prober
+	chmod +x debian/grub-android-prober/etc/kernel/preinst.d/grub-android-prober
+	chmod +x debian/grub-android-prober/etc/kernel/prerm.d/grub-android-prober

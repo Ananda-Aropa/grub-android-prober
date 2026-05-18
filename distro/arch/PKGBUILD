@@ -1,0 +1,40 @@
+# Maintainer: shadichy <shadichy.dev@gmail.com>
+
+pkgbase='grub-android-prober'
+pkgname=('grub-android-prober' 'grub-android-prober-systemd')
+install='grub-android-prober.install'
+pkgver=0.1.6
+pkgrel=1
+pkgdesc='GRUB Configuration for Android detection (Only works with some sort of filesystems)'
+arch=('any')
+license=('GPLv3')
+url='https://github.com/shadichy/grub-android-x86.git'
+depends=('grub' 'bash')
+makedepends=()
+source=(
+	"30_android-prober"
+	"grub-android-prober"
+	"android-prober.service"
+	"android-prober@.timer"
+	"grub-android-prober.hook"
+	"grub-android-prober.install"
+)
+sha512sums=('4184b108c80e0e40b5a9337664c1b4d2411c44b9e1cbee24ad6f12646ae038f43a16bb90e91b35fc7e6ecacd1e3300b5f5b6d45e17634fd1ee933596274a4718' '5a99c5b154c518f9024de516aef6f6cdfca11592312e7ebde8feb681c87d13fbf67ca5cac210a4b26920d50078a9ee9aa3ed430f94b4860ac67e0846e48bc85c' '359cac13caac8baedfb85e2a094c144a696db626d92b716171185d788db30f0861b5231d11f2d466aa8a846e9b8d7919b33ffb4a0db94a3cfb5efce63a0788c1' 'de1d580fd8ff87f78bc599248c5b27d8c9600641a35c6f774c83fdf8a2f1a6374ff260e3d7c9a9c99f614caf7e82a4cb3b49b345a91f46c6ef02ede590ca4f8c' 'e5021bd6392085f0d4de2a958b9af9a0e40b6b428dc13136a9024651473a7bc6f3b53a375629c17b930ca3dd86e7f15dc670d4e2ccbe64dce31b865423f0bf34' '67f461a206ec1177b59b9fab9d30e144997ee415103f45f148b51fe5fa65e8c8cedb2030b3e7c08e6db7c9cfd59b73f14cd3915bb516a8fa7964dea8e0e727d7' )
+
+package_grub-android-prober() {
+	depends=('grub' 'bash')
+	provides=('grub-android-prober')
+	conflicts=('grub-android-prober')
+
+	install -Dm755 "30_android-prober" "$pkgdir/etc/grub.d/30_android-prober"
+	install -Dm755 "grub-android-prober" "$pkgdir/usr/sbin/grub-android-prober"
+	install -Dm644 "grub-android-prober.hook" "$pkgdir/usr/share/libalpm/hooks/grub-android-prober.hook"
+}
+
+package_grub-android-prober-systemd() {
+	pkgdesc='Systemd timer for grub-android-prober cache refresh'
+	depends=('grub-android-prober' 'systemd')
+
+	install -Dm644 "android-prober.service" "$pkgdir/usr/lib/systemd/system/android-prober.service"
+	install -Dm644 "android-prober@.timer" "$pkgdir/usr/lib/systemd/system/android-prober@.timer"
+}

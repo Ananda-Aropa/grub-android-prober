@@ -6,9 +6,8 @@ License:        GPLv3
 URL:            https://github.com/shadichy/grub-android-x86
 Source0:        30_android-prober
 Source1:        grub-android-prober
-Source2:        VERSION
-Source3:        android-prober.service
-Source4:        android-prober@.timer
+Source2:        android-prober.service
+Source3:        android-prober@.timer
 
 BuildArch:      noarch
 Requires:       grub2-common
@@ -39,8 +38,8 @@ mkdir -p %{buildroot}%{_unitdir}
 
 install -m 755 %{SOURCE0} %{buildroot}%{_sysconfdir}/grub.d/30_android-prober
 install -m 755 %{SOURCE1} %{buildroot}%{_sbindir}/grub-android-prober
-install -m 644 %{SOURCE3} %{buildroot}%{_unitdir}/android-prober.service
-install -m 644 %{SOURCE4} %{buildroot}%{_unitdir}/android-prober@.timer
+install -m 644 %{Source2} %{buildroot}%{_unitdir}/android-prober.service
+install -m 644 %{Source3} %{buildroot}%{_unitdir}/android-prober@.timer
 
 %post
 echo "Running grub-android-prober..."
@@ -53,5 +52,8 @@ echo "Running grub-android-prober..."
 %files systemd
 %{_unitdir}/android-prober.service
 %{_unitdir}/android-prober@.timer
+
+%transfiletriggerin -- /usr/lib/modules
+/usr/sbin/grub-android-prober || :
 
 %changelog

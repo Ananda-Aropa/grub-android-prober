@@ -1,6 +1,9 @@
 .vscode
-*.pkg.*
-/src
-/pkg
-/debian/grub-android-prober
-*.log>
+*.log
+/out/
+/install/
+/alpine-install/
+/rpm-install/
+/arch-install/
+*.tar
+built-deb-files.zip

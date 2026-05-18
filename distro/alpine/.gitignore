@@ -1,0 +1,9 @@
+/pkg/
+/src/
+*.apk
+
+# source files
+android-prober.service
+android-prober@.timer
+30_android-prober
+grub-android-prober

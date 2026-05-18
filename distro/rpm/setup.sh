@@ -1,10 +1,13 @@
 #!/bin/bash
 set -e
 
+# Navigate to script directory
+cd "$(dirname "$0")"
+
 # Get version from VERSION file, removing leading 'v' and converting '-' to '+'
-VERSION=$(cat VERSION | sed 's/^v//;s/-/+/g')
+VERSION=$(cat ../../VERSION | sed 's/^v//;s/-/+/g')
 RELEASE=${RELEASE:-1}
-SPEC_FILE="rpm/grub-android-prober.spec"
+SPEC_FILE="grub-android-prober.spec"
 
 # Update version and release in spec file
 sed -i "s/^Version:.*/Version:        $VERSION/" "$SPEC_FILE"
@@ -21,5 +24,3 @@ cat <<EOT >> "$SPEC_FILE"
 * $DATE $MAINTAINER - $VERSION-$RELEASE
 - $MSG
 EOT
-
-cp -r systemd/. ./

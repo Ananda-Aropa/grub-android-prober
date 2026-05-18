@@ -52,7 +52,13 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Set up source files
-        run: ./debian/setup.sh
+        run: |
+          bash ./distro/debian/setup.sh
+          bash ./distro/rpm/setup.sh
+          bash ./distro/arch/gen_pkgbuild.sh
+          bash ./distro/alpine/setup.sh
+          cp -r -t . distro/{debian,rpm}
+
 
       - name: Build DEB package
         uses: Ananda-Aropa/build-deb@main
@@ -61,12 +67,12 @@ jobs:
           arch: amd64
           docker_arch_specific: true
 
-      - name: Extract artifact
+      - name: Extract Debian artifact
         run: unzip -o built-deb-files.zip
 
       - name: Build Arch package
         run: |
-          docker buildx build -f docker/archlinux.dockerfile -t arch-build --allow security.insecure --output type=tar,dest=arch-install.tar .
+          docker buildx build -f ci/docker/archlinux.dockerfile -t arch-build --allow security.insecure --output type=tar,dest=arch-install.tar .
           mkdir arch-install
           sudo tar -C arch-install -psxf arch-install.tar output
           sudo find arch-install/output -mindepth 1 -maxdepth 1 -name "*.pkg.tar*" -exec mv {} ./ \;
@@ -74,7 +80,7 @@ jobs:
 
       - name: Build Alpine package
         run: |
-          docker buildx build -f docker/alpine.dockerfile -t alpine-build --allow security.insecure --output type=tar,dest=alpine-install.tar .
+          docker buildx build -f ci/docker/alpine.dockerfile -t alpine-build --allow security.insecure --output type=tar,dest=alpine-install.tar .
           mkdir alpine-install
           sudo tar -C alpine-install -psxf alpine-install.tar output
           sudo find alpine-install/output -mindepth 1 -maxdepth 1 -name "*.apk" -exec mv {} ./ \;
@@ -82,7 +88,7 @@ jobs:
 
       - name: Build RPM package
         run: |
-          docker buildx build -f docker/rpm.dockerfile -t rpm-build --allow security.insecure --output type=tar,dest=rpm-install.tar .
+          docker buildx build -f ci/docker/rpm.dockerfile -t rpm-build --allow security.insecure --output type=tar,dest=rpm-install.tar .
           mkdir rpm-install
           sudo tar -C rpm-install -psxf rpm-install.tar output
           sudo find rpm-install/output -mindepth 1 -maxdepth 1 -name "*.rpm" -exec mv {} ./ \;

@@ -31,16 +31,16 @@ Alternatively, you can use the following method for distros that don't have offi
 Make sure you have superuser permission (`sudo su` or `doas su`) and /usr/local/bin is in your `$PATH`
 
 ```sh
-wget -O /etc/grub.d/30_android-prober https://github.com/shadichy/grub-android-x86/raw/master/30_android-prober
-wget -O /usr/local/bin/grub-android-prober https://github.com/shadichy/grub-android-x86/raw/master/grub-android-prober
+wget -O /etc/grub.d/30_android-prober https://github.com/shadichy/grub-android-x86/raw/master/src/30_android-prober
+wget -O /usr/local/bin/grub-android-prober https://github.com/shadichy/grub-android-x86/raw/master/src/grub-android-prober
 chmod +x /etc/grub.d/30_android-prober /usr/local/bin/grub-android-prober
 ```
 
 Or with `curl`
 
 ```sh
-curl -Lo /etc/grub.d/30_android-prober https://github.com/shadichy/grub-android-x86/raw/master/30_android-prober
-curl -Lo /usr/local/bin/grub-android-prober https://github.com/shadichy/grub-android-x86/raw/master/grub-android-prober
+curl -Lo /etc/grub.d/30_android-prober https://github.com/shadichy/grub-android-x86/raw/master/src/30_android-prober
+curl -Lo /usr/local/bin/grub-android-prober https://github.com/shadichy/grub-android-x86/raw/master/src/grub-android-prober
 chmod +x /etc/grub.d/30_android-prober /usr/local/bin/grub-android-prober
 ```
 
@@ -86,6 +86,30 @@ Specify max recursive directory search limit
 GRUB_ANDROID_SEARCH_DEPTH=5
 ```
 
+### GRUB_ANDROID_CACHE
+
+Enable caching
+
+```sh
+GRUB_ANDROID_CACHE="enabled"
+```
+
+### GRUB_ANDROID_CACHE_DIR
+
+Set cache directory
+
+```sh
+GRUB_ANDROID_CACHE_DIR="/var/cache/grub/android"
+```
+
+### GRUB_ANDROID_CACHE_EXPIRE_DAYS
+
+Set cache expiration (in days)
+
+```sh
+GRUB_ANDROID_CACHE_EXPIRE_DAYS="60"
+```
+
 ## Build
 
 First clone the repository
@@ -98,11 +122,33 @@ cd ./grub-android-x86
 ### Arch Linux
 
 ```sh
+cd distro/arch
+bash gen_pkgbuild.sh
 makepkg -si
 ```
 
 ### Debian
 
 ```sh
+bash distro/debian/setup.sh
+cp -r distro/debian .
 dpkg-buildpackage
+```
+
+### Fedora
+
+```sh
+bash distro/rpm/setup.sh
+mkdir -p ~/{SOURCES,SPECS,RPMS,SRPMS}
+find src -type f -exec cp -t ~/SOURCES {} +
+cp distro/rpm/grub-android-prober.spec ~/SPECS
+rpmbuild -ba ~/SPECS/grub-android-prober.spec
+```
+
+### Alpine
+
+```sh
+cd distro/alpine
+bash setup.sh
+abuild -Ff
 ```

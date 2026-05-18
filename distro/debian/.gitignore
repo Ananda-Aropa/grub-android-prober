@@ -1,0 +1,14 @@
+/grub-android-prober/
+/grub-android-prober-*-*-*/
+/.debhelper
+/changelog
+*.deb
+*.udeb
+*.changes
+*.buildinfo
+*.dsc
+*.tar.gz
+*.tar.xz
+*.substvars
+/files
+debhelper-build-stamp

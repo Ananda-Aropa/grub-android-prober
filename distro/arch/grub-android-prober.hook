@@ -1,0 +1,12 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Path
+Target = usr/lib/modules/*/vmlinuz
+Target = usr/lib/modules/*/extramodules/*
+
+[Action]
+Description = Updating Android Prober cache...
+When = PreTransaction
+Exec = /usr/bin/grub-android-prober
