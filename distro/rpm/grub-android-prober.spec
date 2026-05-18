@@ -38,8 +38,8 @@ mkdir -p %{buildroot}%{_unitdir}
 
 install -m 755 %{SOURCE0} %{buildroot}%{_sysconfdir}/grub.d/30_android-prober
 install -m 755 %{SOURCE1} %{buildroot}%{_sbindir}/grub-android-prober
-install -m 644 %{Source2} %{buildroot}%{_unitdir}/android-prober.service
-install -m 644 %{Source3} %{buildroot}%{_unitdir}/android-prober@.timer
+install -m 644 %{SOURCE2} %{buildroot}%{_unitdir}/android-prober.service
+install -m 644 %{SOURCE3} %{buildroot}%{_unitdir}/android-prober@.timer
 
 %post
 echo "Running grub-android-prober..."
