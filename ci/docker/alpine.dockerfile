@@ -20,7 +20,7 @@ USER root
 RUN cp /home/builder/.abuild/*.pub /etc/apk/keys/
 
 USER builder
-WORKDIR /grub-android-prober
+WORKDIR /grub-android-prober/distro/alpine
 
 RUN abuild checksum
 RUN abuild -F -r
