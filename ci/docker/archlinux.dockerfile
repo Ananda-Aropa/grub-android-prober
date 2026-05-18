@@ -7,7 +7,7 @@ COPY . /grub-android-prober
 WORKDIR /grub-android-prober
 
 # Setup source files
-RUN bash distro/arch/setup.sh
+RUN bash distro/arch/gen_pkgbuild.sh
 
 # Remove expiration date of nobody
 RUN chage -E -1 nobody

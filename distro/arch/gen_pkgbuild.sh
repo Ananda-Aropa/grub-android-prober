@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 # Navigate to the directory of this script
 cd "$(dirname "$0")"
 
