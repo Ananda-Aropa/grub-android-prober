@@ -55,8 +55,6 @@ jobs:
         run: |
           bash ./distro/debian/setup.sh
           bash ./distro/rpm/setup.sh
-          bash ./distro/arch/gen_pkgbuild.sh
-          bash ./distro/alpine/setup.sh
           cp -r -t . distro/{debian,rpm}
 
 

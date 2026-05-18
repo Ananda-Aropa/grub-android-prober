@@ -5,7 +5,11 @@ RUN apk add --no-cache abuild build-base bash sudo
 RUN adduser -D builder && addgroup builder abuild
 RUN echo "builder ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-COPY ./distro/alpine /grub-android-prober
+COPY . /grub-android-prober
+WORKDIR /grub-android-prober
+
+RUN bash distro/alpine/setup.sh
+
 RUN chown -R builder:builder /grub-android-prober
 RUN apk update
 
